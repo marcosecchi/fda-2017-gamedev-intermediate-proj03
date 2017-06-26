@@ -25,6 +25,21 @@ public class StoryManager : MonoBehaviour {
 	[SerializeField]
 	private Text textPrefab;
 
+	[SerializeField]
+	private Image sherlockPortrait;
+
+	[SerializeField]
+	private Image johnPortrait;
+
+	[SerializeField]
+	private Color sherlockTextColor;
+
+	[SerializeField]
+	private Color johnTextColor;
+
+	[SerializeField]
+	private Color greyedOutPortaitColor;
+
 	void Start () {
 		StartStory ();	
 	}
@@ -32,31 +47,96 @@ public class StoryManager : MonoBehaviour {
 	// Inizializza la storia e rigenera la view
 	void StartStory() {
 		_story = new Story (inkJSONAsset.text);
-		RefreshView ();
+		StartCoroutine (RefreshView());
 	}
 
 	// Rigenera la view
-	void RefreshView() {
+	IEnumerator RefreshView() {
 
-		// Rimuovere tutti gli elementi
+		RemoveChildren ();
 
 		// Cicla sugli elementi della storia,
 		// fino a trovare una opzione
-		while(_story.canContinue) {
-			// salva la riga di testo successiva
-			string text = _story.Continue ();
-			//Debug.Log (text);
-			CreateContentView (text);
+		while (_story.canContinue) {
+			string text = _story.Continue ().Trim();
+			yield return new WaitForSeconds(2f);
+			CreateContentView(text);
 		}
-		// Creare gli oggetti (pulsanti)
+
+		if(_story.currentChoices.Count > 0) {
+			for (int i = 0; i < _story.currentChoices.Count; i++) {
+				Choice choice = _story.currentChoices [i];
+				Button button = CreateChoiceView (choice.text.Trim ());
+				button.onClick.AddListener (delegate {
+					OnClickChoiceButton (choice);
+				});
+			}
+		} else {
+			Button choice = CreateChoiceView("Ricomincia");
+			choice.onClick.AddListener(delegate{
+				StartStory();
+			});
+		}
+	}
+
+	void OnClickChoiceButton (Choice choice) {
+		_story.ChooseChoiceIndex (choice.index);
+		StartCoroutine (RefreshView());
+	}
+
+	Sprite GetPortrait(List<string> list, string character) {
+		foreach (string tag in list) {
+			Sprite s = Resources.Load<Sprite> (character + "/" + tag);
+			if (s != null)
+				return s;
+		}
+		return null;
+	}
+
+	Button CreateChoiceView (string text) {
+		Button choice = Instantiate (buttonPrefab) as Button;
+		choice.transform.SetParent (container, false);
+
+		Text choiceText = choice.GetComponentInChildren<Text> ();
+		choiceText.text = text;
+
+		HorizontalLayoutGroup layoutGroup = choice.GetComponent <HorizontalLayoutGroup> ();
+		layoutGroup.childForceExpandHeight = false;
+
+		return choice;
 	}
 
 	// Aggiunge una riga di testo al container,
 	// instanziando il prefab
-	void CreateContentView(string text) {
-		Text storyText = Instantiate (textPrefab) as Text; 
+	void CreateContentView (string text) {
+		johnPortrait.color = greyedOutPortaitColor;
+		sherlockPortrait.color = greyedOutPortaitColor;
+		Text storyText = Instantiate (textPrefab) as Text;
 		storyText.text = text;
-		storyText.transform.SetParent(container);
+		if (text.StartsWith ("S:")) {
+			storyText.color = sherlockTextColor;
+			Sprite p = GetPortrait (_story.currentTags, "holmes");
+			if (p != null)
+				sherlockPortrait.sprite = p;
+			sherlockPortrait.color = Color.white;
+
+		}
+		if (text.StartsWith ("J:")) {
+			storyText.color = johnTextColor;
+			Sprite p = GetPortrait (_story.currentTags, "watson");
+			if (p != null)
+				johnPortrait.sprite = p;
+			johnPortrait.color = Color.white;
+
+		}
+		storyText.transform.SetParent (container, false);
+	}
+
+	void RemoveChildren () {
+		int childCount = container.childCount;
+		for (int i = childCount - 1; i >= 0; --i) {
+			GameObject.Destroy (container.GetChild (i).gameObject);
+		}
 	}
 	
 }
