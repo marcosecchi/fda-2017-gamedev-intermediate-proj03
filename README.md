@@ -15,6 +15,9 @@ Utilizzo di Ink all'interno di un progetto Unity3D
 * [Ink](http://www.inklestudios.com/ink/)
 * [Inky](http://www.github.com/inkle/inky/releases/latest): Ink Editor
 * [Ink Unity Integration](https://www.assetstore.unity3d.com/en/#!/content/60055)
+* [Coroutines](https://unity3d.com/learn/tutorials/topics/scripting/coroutines)
+* [Delegates](https://docs.microsoft.com/it-it/dotnet/csharp/language-reference/keywords/delegate)
+* [WaitForSeconds](https://docs.unity3d.com/ScriptReference/WaitForSeconds.html)
 
 ### Link Utili
 
