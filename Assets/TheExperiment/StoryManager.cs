@@ -59,7 +59,7 @@ public class StoryManager : MonoBehaviour {
 		// fino a trovare una opzione
 		while (_story.canContinue) {
 			string text = _story.Continue ().Trim();
-			yield return new WaitForSeconds(2f);
+			yield return new WaitForSeconds(.3f);
 			CreateContentView(text);
 		}
 
@@ -99,9 +99,6 @@ public class StoryManager : MonoBehaviour {
 
 		Text choiceText = choice.GetComponentInChildren<Text> ();
 		choiceText.text = text;
-
-		HorizontalLayoutGroup layoutGroup = choice.GetComponent <HorizontalLayoutGroup> ();
-		layoutGroup.childForceExpandHeight = false;
 
 		return choice;
 	}
